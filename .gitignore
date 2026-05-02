@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.ipynb_checkpoints/
+*.swp
+.DS_Store
+
+# Outputs / artifacts (not code)
+runs/
+checkpoints/
+weights/
+logs/
+*.ckpt
+*.pt
+*.pth
+*.npz
+wandb/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,74 @@
+# Three-way JEPA encoder configuration.
+#
+# Two consumers read this file:
+#   1. scripts/precompute_features.py     -- needs language_weights, vision_weights, language_tokens
+#   2. scripts/train_droid.py + engine/   -- needs everything else
+
+model:
+  # Shared transformer dimensions used across the fuser, projector, and
+  # per-modality projections.
+  d_model: 384
+  d_shared: 512
+  n_heads: 6
+  ffn: 1536
+  fuser_layers: 4
+  dropout: 0.1
+
+  # BYOL projector / predictor MLP.
+  proj_hidden: 1024
+  proj_out: 512
+
+  # Action / proprio dimensions (DROID Franka 7-DoF + gripper).
+  action_slots: 14
+  proprio_dim: 20
+
+  # Precomputed-feature shapes. Must match what scripts/precompute_features.py
+  # writes; T5-base and DINOv2-B/14 both output 768-d.
+  language_tokens: 32
+  language_dim: 768
+  video_dim: 768
+
+  # Local paths to the frozen backbones, consumed by precompute_features.py
+  # only. Update these for your environment.
+  language_weights: /path/to/t5-base
+  vision_weights:   /path/to/dinov2-base
+
+train:
+  total_steps: 20000
+  warmup_steps: 1000
+  lr_encoders: 3.0e-4
+  lr_heads:    1.0e-3
+  wd:          0.05
+  betas:       [0.9, 0.95]
+  grad_clip:   1.0
+  batch_per_gpu: 512
+  bf16:        true
+
+  # EMA momentum schedule (cosine ramp from start -> end across total_steps).
+  tau_start: 0.99
+  tau_end:   0.9995
+
+  # Run the probe suite every N steps. Probes are forward-only and use a
+  # fixed held-out batch.
+  probe_every: 500
+
+loss:
+  alpha_align: 1.0
+  alpha_vic:   0.75
+  vicreg_var_coef: 25.0
+  vicreg_cov_coef: 1.0
+  vicreg_eps:      1.0e-3
+
+data:
+  # Per-episode action / proprio sequence cap (variable N_ep is truncated to
+  # this value in the dataset, then the collate pads to per-batch max).
+  max_seq_len: 128
+
+  # Quality filters applied at index-build time. Both require droid_root to
+  # be passed via the train script's --droid_root CLI flag.
+  filter_success: true
+  filter_empty_L: true
+
+  # Paraphrase expansion: each episode is materialized as N samples, one per
+  # paraphrase slot, instead of mean-pooling the 3 paraphrases into one.
+  paraphrase_expansion: 3
