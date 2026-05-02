@@ -15,7 +15,7 @@ leave-one-out consensus target plus VICReg.
        proj_L          proj_V + LN             act_embed
         │                 │                       │
         └──────┐  ┌───────┴───────┐  ┌────────────┘
-              [SHARED_Q | L | V | A]   ← one of A/V/L is content-zeroed
+              [SHARED_Q | L | V |   A  ]   ← one of A/V/L is content-zeroed
                        │                  per branch; type embeddings tag
                   TriadicFuser            every slot so the fuser can
                        │                  address even the zeroed slot
@@ -25,7 +25,7 @@ leave-one-out consensus target plus VICReg.
                        │                   │  align_loss_loo against
                       zp                   │  L2(mean of the OTHER TWO
                        │                   │  branches' EMA projector outputs)
-                  Predictor h           ──┘
+                  Predictor h            ──┘
 ```
 
 Per-branch zeroing pattern:
